@@ -1,12 +1,12 @@
 x-env: &env
-  DATABASE_URL: postgresql+asyncpg://catalog:catalog@postgres:5432/catalog
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
   MINIO_ENDPOINT: minio:9000
-  MINIO_ACCESS_KEY: minioadmin
-  MINIO_SECRET_KEY: minioadmin123
+  MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+  MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
   MINIO_BUCKET: products
-  INTERNAL_TOKEN: internal-secret
+  INTERNAL_TOKEN: ${INTERNAL_TOKEN}
   BACKEND_URL: http://backend:8000
-  WEBHOOK_SECRET: webhook-secret
+  WEBHOOK_SECRET: ${WEBHOOK_SECRET}
   BOT_TOKEN: ${BOT_TOKEN}
   ADMIN_IDS: ${ADMIN_IDS}
   PUBLIC_URL: ${PUBLIC_URL}
@@ -15,23 +15,23 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: catalog
-      POSTGRES_PASSWORD: catalog
-      POSTGRES_DB: catalog
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U catalog -d catalog"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 3s
       timeout: 3s
       retries: 20
 
   minio:
-    image: minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - miniodata:/data
     ports:
